@@ -1,0 +1,16 @@
+# backend
+backend/server
+backend/*.exe
+
+# frontend
+frontend/node_modules/
+frontend/dist/
+
+# env
+.env
+
+# editors / OS
+.vscode/
+.idea/
+*.log
+.DS_Store
