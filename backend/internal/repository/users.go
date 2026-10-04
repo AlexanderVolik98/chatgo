@@ -63,3 +63,28 @@ func (s *UserRepository) GetByID(ctx context.Context, id int64) (*models.User, e
 	}
 	return u, nil
 }
+
+func (s *UserRepository) UpdateUsername(ctx context.Context, id int64, username string) (*models.User, error) {
+	u := &models.User{}
+	err := s.pool.QueryRow(ctx, `
+		UPDATE users
+		SET username = $1
+		WHERE id = $2
+		RETURNING id, username, email, password_hash, created_at
+	`, username, id).Scan(&u.ID, &u.Username, &u.Email, &u.PasswordHash, &u.CreatedAt)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+
+	var pgErr *pgconn.PgError
+
+	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		return nil, ErrAlreadyExists
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
+}

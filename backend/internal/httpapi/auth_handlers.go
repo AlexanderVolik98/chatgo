@@ -1,7 +1,6 @@
 package httpapi
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -11,12 +10,6 @@ import (
 	"chatgo/backend/internal/models"
 	"chatgo/backend/internal/repository"
 )
-
-type UserRepository interface {
-	Create(ctx context.Context, username, email, passwordHash string) (*models.User, error)
-	GetByEmail(ctx context.Context, email string) (*models.User, error)
-	GetByID(ctx context.Context, id int64) (*models.User, error)
-}
 
 type AuthHandler struct {
 	users  UserRepository
@@ -47,8 +40,8 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	req.Username = strings.TrimSpace(req.Username)
 	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
 
-	if len(req.Username) < 3 || len(req.Password) < 8 || req.Email == "" {
-		writeError(w, http.StatusBadRequest, "username must be >= 3 chars, password >= 8 chars, email required")
+	if len(req.Username) < 2 || len(req.Password) < 8 || req.Email == "" {
+		writeError(w, http.StatusBadRequest, "username must be >= 2 chars, password >= 8 chars, email required")
 		return
 	}
 
@@ -107,13 +100,4 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, authResponse{Token: token, User: *user})
-}
-
-func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request, userID int64) {
-	user, err := h.users.GetByID(r.Context(), userID)
-	if err != nil {
-		writeError(w, http.StatusNotFound, "user not found")
-		return
-	}
-	writeJSON(w, http.StatusOK, user)
 }

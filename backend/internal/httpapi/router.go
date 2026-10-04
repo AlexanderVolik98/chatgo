@@ -19,6 +19,7 @@ type Deps struct {
 
 func NewRouter(d Deps) http.Handler {
 	authH := NewAuthHandler(d.Users, d.Tokens)
+	userH := NewUserHandler(d.Users)
 	roomH := NewRoomHandler(d.Rooms)
 	msgH := NewMessageHandler(d.Rooms, d.Msgs)
 
@@ -34,7 +35,8 @@ func NewRouter(d Deps) http.Handler {
 	mux.HandleFunc("GET /ws", d.WS.ServeHTTP)
 
 	protected := http.NewServeMux()
-	protected.HandleFunc("GET /api/me", withUser(authH.Me))
+	protected.HandleFunc("GET /api/me", withUser(userH.Get))
+	protected.HandleFunc("PATCH /api/me", withUser(userH.Update))
 
 	protected.HandleFunc("GET /api/rooms", withUser(roomH.List))
 	protected.HandleFunc("POST /api/rooms", withUser(roomH.Create))
