@@ -5,6 +5,7 @@ const routes = [
   { path: '/', redirect: '/rooms' },
   { path: '/login', name: 'login', component: () => import('../views/LoginView.vue'), meta: { guestOnly: true } },
   { path: '/register', name: 'register', component: () => import('../views/RegisterView.vue'), meta: { guestOnly: true } },
+  { path: '/profile', name: 'profile', component: () => import('../views/ProfileView.vue'), meta: { requiresAuth: true } },
   { path: '/rooms', name: 'rooms', component: () => import('../views/RoomsView.vue'), meta: { requiresAuth: true } },
   { path: '/rooms/:id', name: 'room', component: () => import('../views/RoomView.vue'), meta: { requiresAuth: true }, props: true },
 ]

@@ -32,6 +32,7 @@ export const api = {
   login: (email, password) =>
     request('/api/auth/login', { method: 'POST', body: { email, password } }),
   me: (token) => request('/api/me', { token }),
+  updateMe: (token, name) => request('/api/me', { method: 'PATCH', token, body: { name } }),
 
   listRooms: (token) => request('/api/rooms', { token }),
   createRoom: (token, name, description, isPrivate) =>

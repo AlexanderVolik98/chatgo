@@ -12,11 +12,24 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
+    setUser(user) {
+      this.user = user
+      localStorage.setItem('chatgo_user', JSON.stringify(user))
+    },
+
     setSession(token, user) {
       this.token = token
-      this.user = user
       localStorage.setItem('chatgo_token', token)
-      localStorage.setItem('chatgo_user', JSON.stringify(user))
+      this.setUser(user)
+    },
+
+    async refreshUser() {
+      this.setUser(await api.me(this.token))
+    },
+
+    async updateUsername(name) {
+      const data = await api.updateMe(this.token, name)
+      this.setUser(data.user)
     },
 
     async register(username, email, password) {

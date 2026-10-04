@@ -19,7 +19,7 @@ function logout() {
     <header class="topbar">
       <router-link to="/rooms" class="brand">ChatGo</router-link>
       <div v-if="auth.isAuthenticated" class="user-box">
-        <span>{{ auth.user?.username }}</span>
+        <router-link to="/profile" class="user-link">{{ auth.user?.username }}</router-link>
         <button @click="logout">Выйти</button>
       </div>
     </header>
@@ -57,6 +57,13 @@ body {
   font-size: 1.2rem;
   color: #38bdf8;
   text-decoration: none;
+}
+.user-link {
+  color: inherit;
+  text-decoration: none;
+}
+.user-link:hover {
+  color: #38bdf8;
 }
 .user-box {
   display: flex;
