@@ -23,35 +23,35 @@ func NewRouter(d Deps) http.Handler {
 	roomH := NewRoomHandler(d.Rooms)
 	msgH := NewMessageHandler(d.Rooms, d.Msgs)
 
-	mux := http.NewServeMux()
+	rootRouter := http.NewServeMux()
 
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
+	rootRouter.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
 
-	mux.HandleFunc("POST /api/auth/register", authH.Register)
-	mux.HandleFunc("POST /api/auth/login", authH.Login)
+	rootRouter.HandleFunc("POST /api/auth/register", authH.Register)
+	rootRouter.HandleFunc("POST /api/auth/login", authH.Login)
 
-	mux.HandleFunc("GET /ws", d.WS.ServeHTTP)
+	rootRouter.HandleFunc("GET /ws", d.WS.ServeHTTP)
 
-	protected := http.NewServeMux()
-	protected.HandleFunc("GET /api/me", withUser(userH.Get))
-	protected.HandleFunc("PATCH /api/me", withUser(userH.Update))
+	userRouter := http.NewServeMux()
+	userRouter.HandleFunc("GET /api/me", withUser(userH.Get))
+	userRouter.HandleFunc("PATCH /api/me", withUser(userH.Update))
 
-	protected.HandleFunc("GET /api/rooms", withUser(roomH.List))
-	protected.HandleFunc("POST /api/rooms", withUser(roomH.Create))
-	protected.HandleFunc("GET /api/rooms/{id}", withUserAndID(roomH.Get))
-	protected.HandleFunc("PATCH /api/rooms/{id}", withUserAndID(roomH.Update))
-	protected.HandleFunc("POST /api/rooms/{id}/join", withUserAndID(roomH.Join))
-	protected.HandleFunc("POST /api/rooms/{id}/leave", withUserAndID(roomH.Leave))
-	protected.HandleFunc("GET /api/rooms/{id}/messages", withUserAndID(msgH.List))
-	protected.HandleFunc("POST /api/rooms/{id}/members/{userId}/role", withUserAndTwoIDs(roomH.SetMemberRole))
-	protected.HandleFunc("DELETE /api/rooms/{id}/members/{userId}", withUserAndTwoIDs(roomH.RemoveMember))
-	protected.HandleFunc("DELETE /api/messages/{id}", withUserAndID(msgH.Delete))
+	userRouter.HandleFunc("GET /api/rooms", withUser(roomH.List))
+	userRouter.HandleFunc("POST /api/rooms", withUser(roomH.Create))
+	userRouter.HandleFunc("GET /api/rooms/{id}", withUserAndID(roomH.Get))
+	userRouter.HandleFunc("PATCH /api/rooms/{id}", withUserAndID(roomH.Update))
+	userRouter.HandleFunc("POST /api/rooms/{id}/join", withUserAndID(roomH.Join))
+	userRouter.HandleFunc("POST /api/rooms/{id}/leave", withUserAndID(roomH.Leave))
+	userRouter.HandleFunc("GET /api/rooms/{id}/messages", withUserAndID(msgH.List))
+	userRouter.HandleFunc("POST /api/rooms/{id}/members/{userId}/role", withUserAndTwoIDs(roomH.SetMemberRole))
+	userRouter.HandleFunc("DELETE /api/rooms/{id}/members/{userId}", withUserAndTwoIDs(roomH.RemoveMember))
+	userRouter.HandleFunc("DELETE /api/messages/{id}", withUserAndID(msgH.Delete))
 
-	mux.Handle("/api/", middleware.RequireAuth(d.Tokens)(protected))
+	rootRouter.Handle("/api/", middleware.RequireAuth(d.Tokens)(userRouter))
 
-	return middleware.CORS(mux)
+	return middleware.Recover(middleware.CORS(rootRouter))
 }
 
 func withUser(fn func(http.ResponseWriter, *http.Request, int64)) http.HandlerFunc {
