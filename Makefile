@@ -1,4 +1,4 @@
-.PHONY: up down logs build backend-dev frontend-dev seed
+.PHONY: up down logs build backend-dev frontend-dev seed seed-large psql
 
 up:
 	docker compose up --build
@@ -23,3 +23,9 @@ frontend-dev:
 
 seed: db-up
 	docker compose exec -T postgres psql -U chatgo -d chatgo < backend/internal/db/seed.sql
+
+seed-large: db-up
+	docker compose exec -T postgres psql -U chatgo -d chatgo < backend/internal/db/seed_large.sql
+
+psql: db-up
+	docker compose exec postgres psql -U chatgo -d chatgo

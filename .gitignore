@@ -1,6 +1,11 @@
 # backend
 backend/server
+backend/cmd/server/main
+backend/cmd/server/server
 backend/*.exe
+
+# personal practice files
+backend/scratch/
 
 # frontend
 frontend/node_modules/
